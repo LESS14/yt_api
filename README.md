@@ -30,55 +30,51 @@ Altere http://127.0.0.1:9000 para o endereço e porta corretos onde sua API back
 
 Outras constantes configuráveis (geralmente não precisam ser alteradas):
 
-    MAX_MUSIC_SEARCH_ITEMS: Número máximo de resultados de busca a serem retornados.
+* MAX_MUSIC_SEARCH_ITEMS: Número máximo de resultados de busca a serem retornados.
 
-    MAX_MUSIC_SEARCH_LENGTH: Comprimento máximo da string de busca.
+* MAX_MUSIC_SEARCH_LENGTH: Comprimento máximo da string de busca.
 
-    Outras constantes MAX_..._LENGTH definem tamanhos de buffer para dados de música.
+* Outras constantes MAX_..._LENGTH definem tamanhos de buffer para dados de música.
 
 API Backend Esperada
 
 Este include espera que a API backend tenha os seguintes endpoints:
 
-    Pesquisa de Músicas:
+Pesquisa de Músicas:
 
-        Endpoint: GET {API_BASE_URL}/api/search?q={query_encodada}&limit={limite}
+Endpoint: GET {API_BASE_URL}/api/search?q={query_encodada}&limit={limite}
 
-        Resposta Esperada (JSON Array):
-
-              
-        [
-          {
-            "id": "VIDEO_ID_1",
-            "title": "Artista 1 - Nome da Música 1",
-            "duration": "3:45"
-          },
-          {
-            "id": "VIDEO_ID_2",
-            "title": "Artista 2 - Nome da Música 2",
-            "duration": "4:12"
-          }
-        ]
-
-            
+Resposta Esperada (JSON Array):
+```json
+[
+    {
+        "id": "VIDEO_ID_1",
+        "title": "Artista 1 - Nome da Música 1",
+        "duration": "3:45"
+    },
+    {
+        "id": "VIDEO_ID_2",
+        "title": "Artista 2 - Nome da Música 2",
+        "duration": "4:12"
+    }
+]
+```
 
 
 Obtenção do Link de Stream:
 
-    Endpoint: GET {API_BASE_URL}/api/download/{video_id}
+Endpoint: GET {API_BASE_URL}/api/download/{video_id}
 
-    Resposta Esperada (JSON Object):
+Resposta Esperada (JSON Object):
 
-          
-    {
-      "playUrl": "URL_DO_STREAM_DE_AUDIO_DIRETO"
-    }
-
+```json          
+{
+    "playUrl": "URL_DO_STREAM_DE_AUDIO_DIRETO"
+}
+```
         
-
-
-
-        Em caso de restrição de idade ou outro erro que impeça o play, a API deve retornar um status HTTP apropriado (ex: HTTP_STATUS_FORBIDDEN (403)).
+> [!WARNING]
+> Em caso de restrição de idade ou outro erro que impeça o play, a API deve retornar um status HTTP apropriado (ex: HTTP_STATUS_FORBIDDEN (403)).
 
 # Funções
 
@@ -86,99 +82,80 @@ Obtenção do Link de Stream:
 
 Inicia uma pesquisa de músicas para um jogador.
 
-    playerid: O ID do jogador que está solicitando a busca.
+* playerid: O ID do jogador que está solicitando a busca.
 
-    search_query[]: As palavras-chave para a busca.
-
-    Retorna: 1 se a requisição de busca foi enviada com sucesso, 0 em caso de falha (ex: jogador não conectado, query inválida, API não inicializada).
-
-    Callback: OnPlayerRequestMusicList será chamada quando os resultados estiverem prontos ou ocorrer um erro.
+* search_query[]: As palavras-chave para a busca.
+* Retorna: 1 se a requisição de busca foi enviada com sucesso, 0 em caso de falha (ex: jogador não conectado, query inválida, API não inicializada).
+* Callback: OnPlayerRequestMusicList será chamada quando os resultados estiverem prontos ou ocorrer um erro.
 
 `PlayMusic(playerid, index)`
 
 Solicita o link de stream e toca a música selecionada da lista de resultados da última busca para um jogador.
 
-    playerid: O ID do jogador.
-
-    index: O índice da música na lista de resultados (0 a MAX_MUSIC_SEARCH_ITEMS - 1).
-
-    Retorna: 1 se a requisição para obter o link foi enviada com sucesso, 0 em caso de falha (ex: jogador não conectado, índice inválido, API não inicializada).
-
-    Callback: OnPlayerPlayMusic será chamada quando o link de stream estiver pronto (ou ocorrer um erro) e a música começar a tocar (ou falhar).
+* playerid: O ID do jogador.
+* index: O índice da música na lista de resultados (0 a MAX_MUSIC_SEARCH_ITEMS - 1).
+* Retorna: 1 se a requisição para obter o link foi enviada com sucesso, 0 em caso de falha (ex: jogador não conectado, índice inválido, API não inicializada).
+* Callback: OnPlayerPlayMusic será chamada quando o link de stream estiver pronto (ou ocorrer um erro) e a música começar a tocar (ou falhar).
 
 `GetPlayerMusicID(playerid, index)`
 
 Retorna o ID da música no índice especificado da última busca do jogador.
 
-    playerid: O ID do jogador.
-
-    index: O índice da música.
-
-    Retorna: String com o ID da música, ou string vazia se inválido. Nota: Retorna um ponteiro para uma string estática; copie o valor se precisar dele persistentemente ou em loops.
+* playerid: O ID do jogador.
+* index: O índice da música.
+* Retorna: String com o ID da música, ou string vazia se inválido. Nota: Retorna um ponteiro para uma string estática; copie o valor se precisar dele persistentemente ou em loops.
 
 `GetPlayerMusicArtist(playerid, index)`
 
 Retorna o nome do artista da música no índice especificado.
 
-    playerid: O ID do jogador.
-
-    index: O índice da música.
-
-    Retorna: String com o nome do artista, ou "Desconhecido" / string vazia. Nota: Retorna um ponteiro para uma string estática.
+* playerid: O ID do jogador.
+* index: O índice da música.
+* Retorna: String com o nome do artista, ou "Desconhecido" / string vazia. Nota: Retorna um ponteiro para uma string estática.
 
 `GetPlayerMusicName(playerid, index)`
 
 Retorna o nome da música no índice especificado.
 
-    playerid: O ID do jogador.
+* playerid: O ID do jogador.
+* index: O índice da música.
 
-    index: O índice da música.
-
-    Retorna: String com o nome da música, ou string vazia. Nota: Retorna um ponteiro para uma string estática.
+* Retorna: String com o nome da música, ou string vazia. Nota: Retorna um ponteiro para uma string estática.
 
 `GetPlayerMusicDuration(playerid, index)`
 
 Retorna a duração da música no índice especificado.
 
-    playerid: O ID do jogador.
-
-    index: O índice da música.
-
-    Retorna: String com a duração da música (ex: "3:45"), ou string vazia. Nota: Retorna um ponteiro para uma string estática.
+* playerid: O ID do jogador.
+* index: O índice da música.
+* Retorna: String com a duração da música (ex: "3:45"), ou string vazia. Nota: Retorna um ponteiro para uma string estática.
 
 `GetPlayerMusicPoolSize(playerid)`
 
 Retorna o número de resultados de música disponíveis da última busca do jogador.
 
-    playerid: O ID do jogador.
-
-    Retorna: O número de resultados.
-
+* playerid: O ID do jogador.
+* Retorna: O número de resultados.
 `GetPlayerCurrentSearch(playerid, dest[], len)`
 
 Copia a última string de busca original do jogador para dest.
 
-    playerid: O ID do jogador.
+* playerid: O ID do jogador.
+* dest[]: Array de destino para a string de busca.
+* len: Tamanho do array dest.
+* Retorna: Ponteiro para dest. String vazia se não houver busca ou jogador inválido.
 
-    dest[]: Array de destino para a string de busca.
-
-    len: Tamanho do array dest.
-
-    Retorna: Ponteiro para dest. String vazia se não houver busca ou jogador inválido.
-
-Callbacks (Forwards)
+Callbacks (publics)
 
 Você precisa implementar estas callbacks em seu gamemode/filterscript.
 
-forward OnPlayerRequestMusicList(playerid, key_words[], bool:error);
+`OnPlayerRequestMusicList(playerid, key_words[], bool:error)`
 
 Chamada quando os resultados da busca de música estão disponíveis ou se ocorreu um erro durante a busca.
 
-    playerid: O ID do jogador que solicitou a busca.
-
-    key_words[]: As palavras-chave originais usadas na busca.
-
-    error: true se ocorreu um erro ao buscar a lista, false se os resultados foram obtidos com sucesso.
+* playerid: O ID do jogador que solicitou a busca.
+* key_words[]: As palavras-chave originais usadas na busca.
+* error: true se ocorreu um erro ao buscar a lista, false se os resultados foram obtidos com sucesso.
 
 Exemplo de Implementação:
 
@@ -210,7 +187,8 @@ public OnPlayerRequestMusicList(playerid, key_words[], bool:error) {
     }
     SendClientMessage(playerid, 0xCCCCCCAA, "Use /playmusic [numero] para tocar.");
     return 1;
-}```
+}
+```
 
     
 
@@ -218,9 +196,8 @@ public OnPlayerRequestMusicList(playerid, key_words[], bool:error) {
 
 Chamada quando uma música começa a tocar para o jogador, ou se ocorreu um erro ao tentar obter o link de stream ou tocar.
 
-    playerid: O ID do jogador.
-
-    index: O índice da música que está sendo tocada (da última lista de busca). Será -1 se ocorreu um erro ao obter o link de stream ou se não foi possível tocar (ex: restrição de idade).
+* playerid: O ID do jogador.
+* index: O índice da música que está sendo tocada (da última lista de busca). Será -1 se ocorreu um erro ao obter o link de stream ou se não foi possível tocar (ex: restrição de idade).
 
 Exemplo de Implementação:
 
@@ -241,16 +218,17 @@ public OnPlayerPlayMusic(playerid, index) {
     format(msg, sizeof(msg), "Tocando agora: %s - %s", artist, name);
     SendClientMessage(playerid, 0x33CCFFAA, msg);
     return 1;
-}```
+}
+```
 
 
 
 Este include utiliza a biblioteca requests para comunicação HTTP assíncrona.
 
-    Logs de erro são impressos no console do servidor (usando printf) para problemas de inicialização ou falhas de requisição.
+Logs de erro são impressos no console do servidor (usando printf) para problemas de inicialização ou falhas de requisição.
 
-    O include gerencia dados por jogador, como a última busca e os resultados. Esses dados são limpos quando o jogador se desconecta.
+O include gerencia dados por jogador, como a última busca e os resultados. Esses dados são limpos quando o jogador se desconecta.
 
-    Lembre-se que a qualidade e disponibilidade das músicas dependem inteiramente da API backend que você está utilizando.
+Lembre-se que a qualidade e disponibilidade das músicas dependem inteiramente da API backend que você está utilizando.
 
-    As funções GetPlayerMusicID, GetPlayerMusicArtist, GetPlayerMusicName, e GetPlayerMusicDuration retornam ponteiros para strings estáticas. Isso significa que o valor retornado é sobrescrito na próxima chamada à mesma função. Se você precisa usar o valor persistentemente (ex: em um loop ou para múltiplos jogadores ao mesmo tempo), copie a string para um buffer local imediatamente após a chamada, como mostrado nos exemplos de callback.
+As funções **GetPlayerMusicID**, **GetPlayerMusicArtist**, **GetPlayerMusicName**, e **GetPlayerMusicDuration** retornam ponteiros para strings estáticas. Isso significa que o valor retornado é sobrescrito na próxima chamada à mesma função. Se você precisa usar o valor persistentemente (ex: em um loop ou para múltiplos jogadores ao mesmo tempo), copie a string para um buffer local imediatamente após a chamada, como mostrado nos exemplos de callback.
