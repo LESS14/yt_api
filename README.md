@@ -183,7 +183,7 @@ Chamada quando os resultados da busca de música estão disponíveis ou se ocorr
 Exemplo de Implementação:
 
       
-````pawn
+```pawn
 public OnPlayerRequestMusicList(playerid, key_words[], bool:error) {
     if(error) {
         SendClientMessage(playerid, 0xFF0000AA, "Erro ao buscar músicas. Tente novamente.");
