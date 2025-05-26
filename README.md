@@ -20,6 +20,14 @@
 2.  Coloque o arquivo `yt_api.inc` na pasta `pawno/include` (ou na pasta de includes do seu projeto).
 3.  Adicione `#include <yt_api>` no topo do seu gamemode ou filterscript.
 
+# Avisos
+        
+> [!WARNING]
+> Em caso de restrição de idade ou outro erro que impeça o play, a API deve retornar um status HTTP apropriado (ex: HTTP_STATUS_FORBIDDEN (403)).
+
+> [!WARNING]
+> As funções **GetPlayerMusicID**, **GetPlayerMusicArtist**, **GetPlayerMusicName**, e **GetPlayerMusicDuration** retornam ponteiros para strings estáticas. Isso significa que o valor retornado é sobrescrito na próxima chamada à mesma função. Se você precisa usar o valor persistentemente (ex: em um loop ou para múltiplos jogadores ao mesmo tempo), copie a string para um buffer local imediatamente após a chamada, como mostrado nos exemplos de callback.
+
 ## Configuração
 
 A principal configuração é a URL base da sua API backend:
@@ -74,9 +82,6 @@ Resposta Esperada (JSON Object):
     "playUrl": "URL_DO_STREAM_DE_AUDIO_DIRETO"
 }
 ```
-        
-> [!WARNING]
-> Em caso de restrição de idade ou outro erro que impeça o play, a API deve retornar um status HTTP apropriado (ex: HTTP_STATUS_FORBIDDEN (403)).
 
 # Funções
 
@@ -230,7 +235,3 @@ Este include utiliza a biblioteca requests para comunicação HTTP assíncrona.
 Logs de erro são impressos no console do servidor (usando printf) para problemas de inicialização ou falhas de requisição.
 
 O include gerencia dados por jogador, como a última busca e os resultados. Esses dados são limpos quando o jogador se desconecta.
-
-Lembre-se que a qualidade e disponibilidade das músicas dependem inteiramente da API backend que você está utilizando.
-
-As funções **GetPlayerMusicID**, **GetPlayerMusicArtist**, **GetPlayerMusicName**, e **GetPlayerMusicDuration** retornam ponteiros para strings estáticas. Isso significa que o valor retornado é sobrescrito na próxima chamada à mesma função. Se você precisa usar o valor persistentemente (ex: em um loop ou para múltiplos jogadores ao mesmo tempo), copie a string para um buffer local imediatamente após a chamada, como mostrado nos exemplos de callback.
