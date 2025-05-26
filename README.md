@@ -6,10 +6,10 @@
 ## Dependências
 
 *   [open.mp](https://www.open.mp) (ou SA-MP)
-*   [YSI_Coding/y_hooks](https://github.com/pawn-lang/YSI-Includes)
-*   [strlib](https://github.com/pawn-lang/samp-stdlib) (geralmente parte do samp-stdlib)
-*   [requests](https://github.com/Southclaws/samp-requests) - Para fazer requisições HTTP.
-*   [Map](https://github.com/pawn-lang/YSI-Includes) (parte do pacote de includes YSI)
+*   [YSI_Coding/y_hooks](https://github.com/pawn-lang/YSI-Includes) (parte do pacote de includes YSI)
+*   [strlib](https://github.com/oscar-broman/strlib) (para funções como sprintf e strurlencode)
+*   [pawn-requests](https://github.com/Southclaws/pawn-requests) (para fazer requisições HTTP)
+*   [pawn-memory](https://github.com/BigETI/pawn-memory) (para acesso a memória do Pawn/hashmap)
 *   **Um serviço de API backend** rodando e acessível pelo servidor SA-MP. Este include é um *cliente* para essa API.
 
 ## Instalação
