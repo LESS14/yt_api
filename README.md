@@ -1,6 +1,8 @@
 # yt_api
  Uma API completa para tocar músicas do YouTube no SA-MP/open.mp
 
+[<img src="https://i.imgur.com/22rmJ2o.png" alt="thumbnail">](https://youtu.be/ttRGhizjfzo)
+
 **Baseado nos estudos de Dr Editor (mustream) - [https://portalsamp.com/showthread.php?tid=3334](https://portalsamp.com/showthread.php?tid=3334)**
 
 ## Dependências
