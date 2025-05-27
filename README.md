@@ -11,7 +11,8 @@
 *   [YSI_Coding/y_hooks](https://github.com/pawn-lang/YSI-Includes) (parte do pacote de includes YSI)
 *   [strlib](https://github.com/oscar-broman/strlib) (para funções como sprintf e strurlencode)
 *   [pawn-requests](https://github.com/Southclaws/pawn-requests) (para fazer requisições HTTP)
-*   [pawn-memory](https://github.com/BigETI/pawn-memory) (para acesso a memória do Pawn/hashmap)
+*   [pawn-map](https://github.com/BigETI/pawn-map) (para hashmap)
+*   [pawn-memory](https://github.com/BigETI/pawn-map) (para acesso direto ao heap do Pawn - dependência do pawn-map)
 *   **Um serviço de API backend** rodando e acessível pelo servidor SA-MP. Este include é um *cliente* para essa API.
 
 ## Instalação
