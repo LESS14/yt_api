@@ -1,4 +1,4 @@
-// Com base nos estudos de Dr Editor (mustream) - https://portalsamp.com/showthread.php?tid=3334
+// Based on the studies of Dr Editor (mustream) - https://portalsamp.com/showthread.php?tid=3334
 
 #if defined _yt_api_included
 	#endinput
@@ -45,13 +45,8 @@ public OnMusicRequestLink(Request:id, E_HTTP_STATUS:status, Node:node);
 hook OnGameModeInit() {
     MusicApiClient = RequestsClient(API_BASE_URL);
     if(!IsValidRequestsClient(MusicApiClient)) {
-        printf("[yt_api.inc] ERRO FATAL: Falha ao inicializar MusicApiClient para URL: %s.", API_BASE_URL);
+        printf("[yt_api.inc] FATAL ERROR: Failed to initialize MusicApiClient for URL: %s.", API_BASE_URL);
     }
-
-    if(RequestToPlayerIdMap == Map:-1) {
-        printf("[yt_api.inc] ERRO FATAL: Falha ao criar RequestToPlayerIdMap.");
-    }
-	return 1;
 }
 
 hook OnPlayerConnect(playerid) {
@@ -86,7 +81,7 @@ stock MusicSearchByKey(playerid, const search_query[]) {
 	if(!IsPlayerConnected(playerid)) return 0;
     if(strlen(search_query) < 1 || strlen(search_query) > MAX_MUSIC_SEARCH_LENGTH) return 0;
     if(!IsValidRequestsClient(MusicApiClient) || RequestToPlayerIdMap == Map:-1) {
-        printf("[yt_api.inc] Cliente da API ou Mapa não inicializado.");
+        printf("[yt_api.inc] API Client or Map not initialized.");
         return 0;
     }
 
@@ -97,14 +92,18 @@ stock MusicSearchByKey(playerid, const search_query[]) {
 		__musicPlayerDataDuration[playerid][i][0] = EOS;
 	}
 	__musicIndexCount[playerid] = 0;
+    format(__musicPlayerSearchOriginal[playerid], sizeof(__musicPlayerSearchOriginal[]), "%s", search_query);
 	
-	static encoded_q[MAX_API_PATH_LENGTH * 2];
+	static encoded_q[MAX_MUSIC_SEARCH_LENGTH * 3 + 1];
 
-    strurlencode(encoded_q, search_query);
-    printf("not encoded: %s | encoded: %s", search_query, encoded_q);	
+    strurlencode(encoded_q, search_query, sizeof(encoded_q));
+    
+    new api_path[MAX_API_PATH_LENGTH];
+    format(api_path, sizeof(api_path), "/api/search?q=%s&limit=%d", encoded_q, MAX_MUSIC_SEARCH_ITEMS);
+
     new Request:req_id = RequestJSON(
         MusicApiClient,
-        sprintf("/api/search?q=%s&limit=%d", encoded_q, MAX_MUSIC_SEARCH_ITEMS),
+        api_path,
         HTTP_METHOD_GET,
         "OnMusicSearchResults",
         Node:-1,
@@ -112,8 +111,8 @@ stock MusicSearchByKey(playerid, const search_query[]) {
     );
 
     if(!IsValidRequest(req_id)) {
-        printf("[MusicSearch] Falha ao criar request para player %d. Path: %s", playerid, sprintf("/api/search?q=%s&limit=%d", encoded_q, MAX_MUSIC_SEARCH_ITEMS));
-        CallLocalFunction("OnPlayerRequestMusicList", "isb", playerid, sprintf("%s", __musicPlayerSearchOriginal[playerid]), true);
+        printf("[MusicSearch] Failed to create request for player %d. Path: %s", playerid, api_path);
+        CallLocalFunction("OnPlayerRequestMusicList", "isb", playerid, __musicPlayerSearchOriginal[playerid], true);
         return 0;
     }
     
@@ -126,7 +125,7 @@ stock PlayMusic(playerid, index) {
     if(index < 0 || index >= __musicIndexCount[playerid]) return 0;
 	if(!strlen(__musicPlayerDataID[playerid][index])) return 0;
     if(!IsValidRequestsClient(MusicApiClient) || RequestToPlayerIdMap == Map:-1) {
-        printf("[yt_api.inc] Cliente da API ou Mapa não inicializado.");
+        printf("[yt_api.inc] API Client or Map not initialized.");
         return 0;
     }
 	
@@ -145,27 +144,22 @@ stock PlayMusic(playerid, index) {
     );
 
     if(!IsValidRequest(req_id)) {
-        printf("[yt_api.inc] Falha ao criar request para player %d. Path: %s", playerid, api_path);
+        printf("[yt_api.inc] Failed to create request for player %d. Path: %s", playerid, api_path);
         CallLocalFunction("OnPlayerPlayMusic", "ii", playerid, -1);
         return 0;
     }
     
-    printf("[yt_api.inc] Requesting link para player %d (video ID: %s)", playerid, __musicPlayerDataID[playerid][index]);
     MAP_insert_val_val(RequestToPlayerIdMap, _:req_id, playerid);
 	return 1;
 }
 
 
 public OnMusicSearchResults(Request:id, E_HTTP_STATUS:status, Node:node) {
-    new playerid = MAP_get_val_val(RequestToPlayerIdMap, _:id);
-
+    new playerid;
 
     if(!IsPlayerConnected(playerid)) {
-        return 1;
+        return;
     }
-
-    new search_keywords_original[MAX_MUSIC_SEARCH_LENGTH + 1];
-    strcat(search_keywords_original, __musicPlayerSearchOriginal[playerid], sizeof(search_keywords_original));
 
     __musicIndexCount[playerid] = 0;
 
@@ -186,12 +180,12 @@ public OnMusicSearchResults(Request:id, E_HTTP_STATUS:status, Node:node) {
                     JsonGetString(item_node, "title", full_title_buffer, sizeof(full_title_buffer));
                     JsonGetString(item_node, "duration", __musicPlayerDataDuration[playerid][count], MAX_MUSIC_DURATION_LENGTH);
                     
-                    new separator_index = strfind(full_title_buffer, " - ");
+                    new separator_index = strfind(full_title_buffer, " - ", false);
                     if(separator_index != -1 && separator_index < (sizeof(full_title_buffer) - 3)) {
                         strmid(__musicPlayerDataArtist[playerid][count], full_title_buffer, 0, separator_index, MAX_MUSIC_ARTIST_LENGTH);
                         strmid(__musicPlayerDataName[playerid][count], full_title_buffer, separator_index + 3, strlen(full_title_buffer), MAX_MUSIC_NAME_LENGTH);
                     } else {
-                        format(__musicPlayerDataArtist[playerid][count], MAX_MUSIC_ARTIST_LENGTH, "Desconhecido");
+                        format(__musicPlayerDataArtist[playerid][count], MAX_MUSIC_ARTIST_LENGTH, "Unknown");
                         format(__musicPlayerDataName[playerid][count], MAX_MUSIC_NAME_LENGTH, "%s", full_title_buffer);
                     }
                     count++;
@@ -199,25 +193,20 @@ public OnMusicSearchResults(Request:id, E_HTTP_STATUS:status, Node:node) {
             }
             __musicIndexCount[playerid] = count;
         } else {
-            printf("[yt_api.inc] Resposta para player %d (%s) não é um array JSON válido.", playerid, search_keywords_original);
+            printf("[yt_api.inc] Response for player %d (%s) is not a valid JSON array.", playerid, __musicPlayerSearchOriginal[playerid]);
         }
 
-        if(__musicIndexCount[playerid] > 0) {
-		    CallLocalFunction("OnPlayerRequestMusicList", "isb", playerid, search_keywords_original, false);
-        } else {
-            CallLocalFunction("OnPlayerRequestMusicList", "isb", playerid, search_keywords_original, true);
-        }
+        CallLocalFunction("OnPlayerRequestMusicList", "isb", playerid, __musicPlayerSearchOriginal[playerid], __musicIndexCount[playerid] == 0);
 	} else {
-        printf("[yt_api.inc] Erro HTTP %d para player %d (busca: %s).", _:status, playerid, search_keywords_original);
-		CallLocalFunction("OnPlayerRequestMusicList", "isb", playerid, search_keywords_original, true);
+        printf("[yt_api.inc] HTTP Error %d for player %d (search: %s).", _:status, playerid, __musicPlayerSearchOriginal[playerid]);
+		CallLocalFunction("OnPlayerRequestMusicList", "isb", playerid, __musicPlayerSearchOriginal[playerid], true);
 	}
-	return 1;
 }
 
 public OnMusicRequestLink(Request:id, E_HTTP_STATUS:status, Node:node) {
-    new playerid = MAP_get_val_val(RequestToPlayerIdMap, _:id);
+    new playerid;
 
-    if(!IsPlayerConnected(playerid)) return 1;
+    if(!IsPlayerConnected(playerid)) return;
 
     new current_selected_index = __musicPlayerSelectedMusicIndex[playerid];
 
@@ -231,59 +220,53 @@ public OnMusicRequestLink(Request:id, E_HTTP_STATUS:status, Node:node) {
                 PlayAudioStreamForPlayer(playerid, music_stream_url);
                 CallLocalFunction("OnPlayerPlayMusic", "ii", playerid, current_selected_index);
             } else {
-                printf("[yt_api.inc] Erro: 'playUrl' recebido vazio para player %d, índice %d.", playerid, current_selected_index);
+                printf("[yt_api.inc] Error: 'playUrl' received empty for player %d, index %d.", playerid, current_selected_index);
                 CallLocalFunction("OnPlayerPlayMusic", "ii", playerid, -1);
             }
         } else {
-             printf("[yt_api.inc] Erro: Resposta JSON para link não é um objeto para player %d, índice %d.", playerid, current_selected_index);
+             printf("[yt_api.inc] Error: JSON response for link is not an object for player %d, index %d.", playerid, current_selected_index);
              CallLocalFunction("OnPlayerPlayMusic", "ii", playerid, -1);
         }
 	}
     else if(status == HTTP_STATUS_FORBIDDEN) {
-        printf("[yt_api.inc] Não foi possível tocar músicas com restrição de idade para %d, índice %d.", playerid, current_selected_index);
+        printf("[yt_api.inc] Could not play age-restricted or forbidden music for player %d, index %d.", playerid, current_selected_index);
+        CallLocalFunction("OnPlayerPlayMusic", "ii", playerid, -1);
     }
-
 	else
 	{
-        printf("[yt_api.inc] Erro HTTP %d ao obter link para player %d, índice %d.", _:status, playerid, current_selected_index);
+        printf("[yt_api.inc] HTTP Error %d when obtaining link for player %d, index %d.", _:status, playerid, current_selected_index);
 		CallLocalFunction("OnPlayerPlayMusic", "ii", playerid, -1);
 	}
+    __musicPlayerSelectedMusicIndex[playerid] = -1;
+}
 
+
+stock GetPlayerMusicID(playerid, index, output[], len = sizeof output) {
+	if(!IsPlayerConnected(playerid) || index < 0 || index >= __musicIndexCount[playerid]) { output[0] = EOS; return 0; }
+	format(output, len, "%s", __musicPlayerDataID[playerid][index]);
 	return 1;
 }
-
-
-stock GetPlayerMusicID(playerid, index) {
-	static value[MAX_MUSIC_ID_LENGTH]; value[0] = EOS;
-	if(!IsPlayerConnected(playerid) || index < 0 || index >= __musicIndexCount[playerid]) return value;
-	strcat(value, __musicPlayerDataID[playerid][index], MAX_MUSIC_ID_LENGTH);
-	return value;
+stock GetPlayerMusicArtist(playerid, index, output[], len = sizeof output) {
+	if(!IsPlayerConnected(playerid) || index < 0 || index >= __musicIndexCount[playerid]) { output[0] = EOS; return 0; }
+	format(output, len, "%s", __musicPlayerDataArtist[playerid][index]);
+	return 1;
 }
-stock GetPlayerMusicArtist(playerid, index) {
-	static value[MAX_MUSIC_ARTIST_LENGTH]; value[0] = EOS;
-	if(!IsPlayerConnected(playerid) || index < 0 || index >= __musicIndexCount[playerid]) return value;
-	strcat(value, __musicPlayerDataArtist[playerid][index], MAX_MUSIC_ARTIST_LENGTH);
-	return value;
+stock GetPlayerMusicName(playerid, index, output[], len = sizeof output) {
+	if(!IsPlayerConnected(playerid) || index < 0 || index >= __musicIndexCount[playerid]) { output[0] = EOS; return 0; }
+	format(output, len, "%s", __musicPlayerDataName[playerid][index]);
+	return 1;
 }
-stock GetPlayerMusicName(playerid, index) {
-	static value[MAX_MUSIC_NAME_LENGTH]; value[0] = EOS;
-	if(!IsPlayerConnected(playerid) || index < 0 || index >= __musicIndexCount[playerid]) return value;
-	strcat(value, __musicPlayerDataName[playerid][index], MAX_MUSIC_NAME_LENGTH);
-	return value;
-}
-stock GetPlayerMusicDuration(playerid, index) {
-	static value[MAX_MUSIC_DURATION_LENGTH]; value[0] = EOS;
-	if(!IsPlayerConnected(playerid) || index < 0 || index >= __musicIndexCount[playerid]) return value;
-	strcat(value, __musicPlayerDataDuration[playerid][index], MAX_MUSIC_DURATION_LENGTH);
-	return value;
+stock GetPlayerMusicDuration(playerid, index, output[], len = sizeof output) {
+	if(!IsPlayerConnected(playerid) || index < 0 || index >= __musicIndexCount[playerid]) { output[0] = EOS; return 0; }
+	format(output, len, "%s", __musicPlayerDataDuration[playerid][index]);
+	return 1;
 }
 stock GetPlayerMusicPoolSize(playerid) {
 	if(!IsPlayerConnected(playerid)) return 0;
 	return __musicIndexCount[playerid];
 }
 stock GetPlayerCurrentSearch(playerid, dest[], len) {
-    dest[0] = EOS;
-    if(!IsPlayerConnected(playerid)) return "";
-    strcat(dest, __musicPlayerSearchOriginal[playerid], len);
-    return dest;
+    if(!IsPlayerConnected(playerid)) { dest[0] = EOS; return 0; }
+    format(dest, len, "%s", __musicPlayerSearchOriginal[playerid]);
+    return 1;
 }

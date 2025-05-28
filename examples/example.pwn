@@ -40,10 +40,16 @@ public OnPlayerRequestMusicList(playerid, key_words[], bool:error) {
 
     SendClientMessage(playerid, 0x6495EDAA, "--- Resultados da Busca ---");
     new track_info[MAX_MUSIC_ARTIST_LENGTH + MAX_MUSIC_NAME_LENGTH + MAX_MUSIC_DURATION_LENGTH + 20];
+    
+    new music_artist_name[MAX_MUSIC_ARTIST_LENGTH], music_name[MAX_MUSIC_NAME_LENGTH], music_duration[MAX_MUSIC_DURATION_LENGTH];
 
     for(new i = 0; i < pool_size; i++) {
+        GetPlayerMusicArtist(playerid, i, music_artist_name);
+        GetPlayerMusicName(playerid, i, music_name);
+        GetPlayerMusicDuration(playerid, i, music_duration);
 
-        format(track_info, sizeof(track_info), "{BDB76B}%d. {FFFFFF}%s - %s (%s)", i + 1, GetPlayerMusicArtist(playerid, i), GetPlayerMusicName(playerid, i), GetPlayerMusicDuration(playerid, i));
+
+        format(track_info, sizeof(track_info), "{BDB76B}%d. {FFFFFF}%s - %s (%s)", i + 1, music_artist_name, music_name, music_duration);
         SendClientMessage(playerid, 0xA9A9A9AA, track_info);
     }
     SendClientMessage(playerid, 0x6495EDAA, "Use /playtrack [numero] para tocar.");
