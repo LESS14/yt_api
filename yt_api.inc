@@ -155,7 +155,7 @@ stock PlayMusic(playerid, index) {
 
 
 public OnMusicSearchResults(Request:id, E_HTTP_STATUS:status, Node:node) {
-    new playerid;
+    new playerid = MAP_get_val_val(RequestToPlayerIdMap, _:id);
 
     if(!IsPlayerConnected(playerid)) {
         return;
@@ -204,7 +204,7 @@ public OnMusicSearchResults(Request:id, E_HTTP_STATUS:status, Node:node) {
 }
 
 public OnMusicRequestLink(Request:id, E_HTTP_STATUS:status, Node:node) {
-    new playerid;
+    new playerid = MAP_get_val_val(RequestToPlayerIdMap, _:id);
 
     if(!IsPlayerConnected(playerid)) return;
 
